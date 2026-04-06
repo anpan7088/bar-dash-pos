@@ -1,16 +1,136 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState, useCallback } from "react";
+import { Table, OrderItem, Product, ViewMode, PaymentMethod } from "@/types/pos";
+import { initialTables } from "@/data/tables";
+import { POSHeader } from "@/components/pos/POSHeader";
+import { TableGrid } from "@/components/pos/TableGrid";
+import { CategoryBar } from "@/components/pos/CategoryBar";
+import { ProductGrid } from "@/components/pos/ProductGrid";
+import { OrderPanel } from "@/components/pos/OrderPanel";
+import { PaymentModal } from "@/components/pos/PaymentModal";
+import { toast } from "sonner";
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+const Index = () => {
+  const [tables, setTables] = useState<Table[]>(initialTables);
+  const [view, setView] = useState<ViewMode>("tables");
+  const [activeTable, setActiveTable] = useState<Table | null>(null);
+  const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
+  const [category, setCategory] = useState("coffee");
+  const [showPayment, setShowPayment] = useState(false);
+
+  const selectTable = useCallback((table: Table) => {
+    setActiveTable(table);
+    setOrderItems(table.order || []);
+    setView("order");
+    if (table.status === "free") {
+      setTables((prev) =>
+        prev.map((t) => (t.id === table.id ? { ...t, status: "occupied" as const } : t))
+      );
+    }
+  }, []);
+
+  const addProduct = useCallback((product: Product) => {
+    setOrderItems((prev) => {
+      const existing = prev.find((i) => i.product.id === product.id);
+      if (existing) {
+        return prev.map((i) =>
+          i.product.id === product.id ? { ...i, quantity: i.quantity + 1 } : i
+        );
+      }
+      return [...prev, { product, quantity: 1 }];
+    });
+  }, []);
+
+  const updateQty = useCallback((productId: string, delta: number) => {
+    setOrderItems((prev) =>
+      prev
+        .map((i) =>
+          i.product.id === productId ? { ...i, quantity: Math.max(0, i.quantity + delta) } : i
+        )
+        .filter((i) => i.quantity > 0)
+    );
+  }, []);
+
+  const removeItem = useCallback((productId: string) => {
+    setOrderItems((prev) => prev.filter((i) => i.product.id !== productId));
+  }, []);
+
+  const goBack = useCallback(() => {
+    if (activeTable) {
+      setTables((prev) =>
+        prev.map((t) =>
+          t.id === activeTable.id
+            ? { ...t, order: orderItems, status: orderItems.length > 0 ? "occupied" : "free" }
+            : t
+        )
+      );
+    }
+    setView("tables");
+    setActiveTable(null);
+    setOrderItems([]);
+  }, [activeTable, orderItems]);
+
+  const handlePayment = useCallback(
+    (method: PaymentMethod) => {
+      if (!activeTable) return;
+      const total = orderItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
+      setTables((prev) =>
+        prev.map((t) =>
+          t.id === activeTable.id ? { ...t, status: "free" as const, order: [] } : t
+        )
+      );
+      setShowPayment(false);
+      setView("tables");
+      setActiveTable(null);
+      setOrderItems([]);
+      toast.success(`Payment of €${total.toFixed(2)} (${method}) confirmed for ${activeTable.name}`);
+    },
+    [activeTable, orderItems]
+  );
+
+  const total = orderItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="flex flex-col h-screen overflow-hidden">
+      <POSHeader />
+
+      {view === "tables" ? (
+        <div className="flex-1 overflow-y-auto">
+          <TableGrid tables={tables} onSelectTable={selectTable} />
+        </div>
+      ) : (
+        <div className="flex-1 flex overflow-hidden">
+          {/* Left: products */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <CategoryBar selected={category} onSelect={setCategory} />
+            <div className="flex-1 overflow-y-auto">
+              <ProductGrid category={category} onAddProduct={addProduct} />
+            </div>
+          </div>
+
+          {/* Right: order */}
+          <div className="w-80 lg:w-96 flex-shrink-0">
+            <OrderPanel
+              tableName={activeTable?.name || ""}
+              items={orderItems}
+              onUpdateQty={updateQty}
+              onRemove={removeItem}
+              onPay={() => setShowPayment(true)}
+              onBack={goBack}
+            />
+          </div>
+        </div>
+      )}
+
+      {showPayment && activeTable && (
+        <PaymentModal
+          total={total}
+          tableName={activeTable.name}
+          onConfirm={handlePayment}
+          onClose={() => setShowPayment(false)}
+        />
+      )}
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
