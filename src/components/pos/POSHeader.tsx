@@ -1,7 +1,14 @@
-import { Clock, Coffee } from "lucide-react";
+import { Clock, Coffee, LogOut } from "lucide-react";
 import { useEffect, useState } from "react";
+import { useAuth } from "@/contexts/AuthContext";
 
-export function POSHeader() {
+interface POSHeaderProps {
+  staffName?: string;
+  staffRole?: string;
+}
+
+export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
+  const { logout } = useAuth();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -21,14 +28,31 @@ export function POSHeader() {
         </div>
       </div>
 
-      <div className="flex items-center gap-2 text-muted-foreground">
-        <Clock className="w-4 h-4" />
-        <span className="text-sm font-medium tabular-nums">
-          {time.toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit" })}
-        </span>
-        <span className="text-xs hidden sm:inline">
-          {time.toLocaleDateString("sl-SI", { weekday: "short", day: "numeric", month: "short" })}
-        </span>
+      <div className="flex items-center gap-4">
+        {staffName && (
+          <div className="flex items-center gap-2">
+            <div className="text-right">
+              <p className="text-sm font-medium leading-tight">{staffName}</p>
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{staffRole}</p>
+            </div>
+            <button
+              onClick={logout}
+              className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-destructive/20 hover:text-destructive transition-colors"
+              title="Odjava"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+        <div className="flex items-center gap-2 text-muted-foreground">
+          <Clock className="w-4 h-4" />
+          <span className="text-sm font-medium tabular-nums">
+            {time.toLocaleTimeString("sl-SI", { hour: "2-digit", minute: "2-digit" })}
+          </span>
+          <span className="text-xs hidden sm:inline">
+            {time.toLocaleDateString("sl-SI", { weekday: "short", day: "numeric", month: "short" })}
+          </span>
+        </div>
       </div>
     </header>
   );
