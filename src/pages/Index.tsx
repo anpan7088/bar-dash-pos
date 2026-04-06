@@ -7,9 +7,12 @@ import { CategoryBar } from "@/components/pos/CategoryBar";
 import { ProductGrid } from "@/components/pos/ProductGrid";
 import { OrderPanel } from "@/components/pos/OrderPanel";
 import { PaymentModal } from "@/components/pos/PaymentModal";
+import { useAuth } from "@/contexts/AuthContext";
+import PinLogin from "@/pages/PinLogin";
 import { toast } from "sonner";
 
 const Index = () => {
+  const { profile, loading } = useAuth();
   const [tables, setTables] = useState<Table[]>(initialTables);
   const [view, setView] = useState<ViewMode>("tables");
   const [activeTable, setActiveTable] = useState<Table | null>(null);
@@ -82,16 +85,28 @@ const Index = () => {
       setView("tables");
       setActiveTable(null);
       setOrderItems([]);
-      toast.success(`Payment of €${total.toFixed(2)} (${method}) confirmed for ${activeTable.name}`);
+      toast.success(`Plačilo €${total.toFixed(2)} (${method}) potrjeno za ${activeTable.name}`);
     },
     [activeTable, orderItems]
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-screen bg-background">
+        <div className="animate-pulse text-muted-foreground">Nalaganje...</div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return <PinLogin />;
+  }
 
   const total = orderItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <POSHeader />
+      <POSHeader staffName={profile.display_name} staffRole={profile.role} />
 
       {view === "tables" ? (
         <div className="flex-1 overflow-y-auto">
@@ -99,15 +114,12 @@ const Index = () => {
         </div>
       ) : (
         <div className="flex-1 flex overflow-hidden">
-          {/* Left: products */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <CategoryBar selected={category} onSelect={setCategory} />
             <div className="flex-1 overflow-y-auto">
               <ProductGrid category={category} onAddProduct={addProduct} />
             </div>
           </div>
-
-          {/* Right: order */}
           <div className="w-80 lg:w-96 flex-shrink-0">
             <OrderPanel
               tableName={activeTable?.name || ""}
