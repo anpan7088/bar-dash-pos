@@ -1,14 +1,40 @@
-import { Clock, Coffee, LogOut } from "lucide-react";
+import { Clock, Coffee, LogOut, Timer } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 interface POSHeaderProps {
   staffName?: string;
   staffRole?: string;
 }
 
+function ShiftTimer({ clockInTime }: { clockInTime: Date }) {
+  const [elapsed, setElapsed] = useState("");
+
+  useEffect(() => {
+    const update = () => {
+      const diff = Date.now() - clockInTime.getTime();
+      const h = Math.floor(diff / 3600000);
+      const m = Math.floor((diff % 3600000) / 60000);
+      const s = Math.floor((diff % 60000) / 1000);
+      setElapsed(`${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}:${s.toString().padStart(2, "0")}`);
+    };
+    update();
+    const timer = setInterval(update, 1000);
+    return () => clearInterval(timer);
+  }, [clockInTime]);
+
+  return (
+    <div className="flex items-center gap-1.5 text-xs bg-primary/10 text-primary px-2 py-1 rounded-lg">
+      <Timer className="w-3.5 h-3.5" />
+      <span className="font-medium tabular-nums">{elapsed}</span>
+    </div>
+  );
+}
+
 export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
-  const { logout } = useAuth();
+  const { logout, clockInTime } = useAuth();
+  const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
 
   useEffect(() => {
@@ -28,9 +54,17 @@ export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      <div className="flex items-center gap-3">
         {staffName && (
           <div className="flex items-center gap-2">
+            {clockInTime && <ShiftTimer clockInTime={clockInTime} />}
+            <button
+              onClick={() => navigate("/hours")}
+              className="text-xs text-muted-foreground hover:text-primary transition-colors hidden sm:block"
+              title="Pregled ur"
+            >
+              Ure
+            </button>
             <div className="text-right">
               <p className="text-sm font-medium leading-tight">{staffName}</p>
               <p className="text-[10px] text-muted-foreground uppercase tracking-wider">{staffRole}</p>
