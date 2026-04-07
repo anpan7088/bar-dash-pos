@@ -1,5 +1,5 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
-import { supabase } from "@/lib/supabase";
+import { supabase } from "@/integrations/supabase/client";
 import type { User } from "@supabase/supabase-js";
 
 export interface StaffProfile {
@@ -16,6 +16,8 @@ interface AuthContextType {
   profile: StaffProfile | null;
   allProfiles: StaffProfile[];
   loading: boolean;
+  activeTimeEntryId: string | null;
+  clockInTime: Date | null;
   pinLogin: (userId: string, pin: string) => Promise<boolean>;
   logout: () => Promise<void>;
   refreshProfiles: () => Promise<void>;
@@ -28,11 +30,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [profile, setProfile] = useState<StaffProfile | null>(null);
   const [allProfiles, setAllProfiles] = useState<StaffProfile[]>([]);
   const [loading, setLoading] = useState(true);
-
-  // We use a hybrid approach:
-  // 1. Supabase Auth for initial registration (email/password)
-  // 2. PIN-based "session" stored in state for daily shift login
-  // The PIN login validates against profiles table without requiring email/password each time
+  const [activeTimeEntryId, setActiveTimeEntryId] = useState<string | null>(null);
+  const [clockInTime, setClockInTime] = useState<Date | null>(null);
 
   const fetchProfiles = async () => {
     const { data } = await supabase
@@ -44,12 +43,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   useEffect(() => {
-    // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       async (_event, session) => {
         setUser(session?.user ?? null);
         if (session?.user) {
-          // Fetch this user's profile
           const { data } = await supabase
             .from("profiles")
             .select("*")
@@ -63,7 +60,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     );
 
-    // Check existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -81,11 +77,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     });
 
-    // Fetch all approved profiles for PIN login screen
     fetchProfiles();
-
     return () => subscription.unsubscribe();
   }, []);
+
+  const clockIn = async (userId: string) => {
+    const { data } = await supabase
+      .from("time_entries")
+      .insert({ user_id: userId, clock_in: new Date().toISOString() })
+      .select("id, clock_in")
+      .single();
+    if (data) {
+      setActiveTimeEntryId(data.id);
+      setClockInTime(new Date(data.clock_in));
+    }
+  };
+
+  const clockOut = async () => {
+    if (activeTimeEntryId) {
+      await supabase
+        .from("time_entries")
+        .update({ clock_out: new Date().toISOString() })
+        .eq("id", activeTimeEntryId);
+      setActiveTimeEntryId(null);
+      setClockInTime(null);
+    }
+  };
 
   const pinLogin = async (userId: string, pin: string): Promise<boolean> => {
     const { data } = await supabase
@@ -98,15 +115,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (data) {
       setProfile(data as StaffProfile);
+      await clockIn(userId);
       return true;
     }
     return false;
   };
 
   const logout = async () => {
+    await clockOut();
     setProfile(null);
-    // Don't sign out of Supabase - just clear the PIN session
-    // This way the PIN login screen stays available without re-entering email/password
   };
 
   const refreshProfiles = async () => {
@@ -115,7 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, allProfiles, loading, pinLogin, logout, refreshProfiles }}
+      value={{ user, profile, allProfiles, loading, activeTimeEntryId, clockInTime, pinLogin, logout, refreshProfiles }}
     >
       {children}
     </AuthContext.Provider>
