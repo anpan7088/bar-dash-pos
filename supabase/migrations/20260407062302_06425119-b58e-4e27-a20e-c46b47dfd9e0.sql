@@ -1,0 +1,1 @@
+CREATE POLICY "Anyone can view approved profiles" ON public.profiles FOR SELECT TO anon USING (approved = true);
