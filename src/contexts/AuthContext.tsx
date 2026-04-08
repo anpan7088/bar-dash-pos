@@ -136,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, allProfiles, loading, activeTimeEntryId, clockInTime, pinLogin, logout, refreshProfiles }}
+      value={{ user, profile, allProfiles, loading, activeTimeEntryId, clockInTime, startingCash, pinLogin, logout, refreshProfiles }}
     >
       {children}
     </AuthContext.Provider>
