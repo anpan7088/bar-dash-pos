@@ -19,7 +19,7 @@ interface AuthContextType {
   activeTimeEntryId: string | null;
   clockInTime: Date | null;
   pinLogin: (userId: string, pin: string) => Promise<boolean>;
-  logout: () => Promise<void>;
+  logout: (revenue: number) => Promise<void>;
   refreshProfiles: () => Promise<void>;
 }
 
@@ -93,11 +93,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const clockOut = async () => {
+  const clockOut = async (revenue?: number) => {
     if (activeTimeEntryId) {
       await supabase
         .from("time_entries")
-        .update({ clock_out: new Date().toISOString() })
+        .update({ clock_out: new Date().toISOString(), revenue: revenue ?? null } as any)
         .eq("id", activeTimeEntryId);
       setActiveTimeEntryId(null);
       setClockInTime(null);
@@ -121,8 +121,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const logout = async () => {
-    await clockOut();
+  const logout = async (revenue: number) => {
+    await clockOut(revenue);
     setProfile(null);
   };
 
