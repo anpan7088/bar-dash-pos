@@ -1,0 +1,1 @@
+ALTER TABLE public.time_entries ADD COLUMN starting_cash numeric DEFAULT NULL;
