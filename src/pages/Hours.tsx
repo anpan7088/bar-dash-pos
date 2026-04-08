@@ -9,6 +9,7 @@ interface TimeEntry {
   user_id: string;
   clock_in: string;
   clock_out: string | null;
+  revenue: number | null;
 }
 
 type ViewMode = "daily" | "weekly" | "monthly";
@@ -71,7 +72,7 @@ export default function Hours() {
   };
 
   const groupedData = () => {
-    const groups: Record<string, { label: string; totalMs: number; entries: TimeEntry[] }> = {};
+    const groups: Record<string, { label: string; totalMs: number; totalRevenue: number; entries: TimeEntry[] }> = {};
 
     entries.forEach((entry) => {
       const d = new Date(entry.clock_in);
@@ -91,10 +92,11 @@ export default function Hours() {
       }
 
       if (!groups[key]) {
-        groups[key] = { label, totalMs: 0, entries: [] };
+        groups[key] = { label, totalMs: 0, totalRevenue: 0, entries: [] };
       }
       const duration = getDuration(entry);
       groups[key].totalMs += duration;
+      groups[key].totalRevenue += entry.revenue || 0;
       groups[key].entries.push(entry);
     });
 
@@ -102,6 +104,7 @@ export default function Hours() {
   };
 
   const totalMs = entries.reduce((sum, e) => sum + getDuration(e), 0);
+  const totalRevenue = entries.reduce((sum, e) => sum + (e.revenue || 0), 0);
 
   return (
     <div className="min-h-screen bg-background">
@@ -139,9 +142,13 @@ export default function Hours() {
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
             <TrendingUp className="w-6 h-6 text-primary" />
           </div>
-          <div>
+          <div className="flex-1">
             <p className="text-xs text-muted-foreground">Skupaj (zadnjih 90 dni)</p>
             <p className="text-2xl font-bold">{formatDuration(totalMs)}</p>
+          </div>
+          <div className="text-right">
+            <p className="text-xs text-muted-foreground">Promet</p>
+            <p className="text-xl font-bold text-primary">€{totalRevenue.toFixed(2)}</p>
           </div>
         </div>
 
@@ -181,6 +188,9 @@ export default function Hours() {
                     <span className="text-sm font-medium capitalize">{group.label}</span>
                   </div>
                   <span className="text-sm font-bold text-primary">{formatDuration(group.totalMs)}</span>
+                  {group.totalRevenue > 0 && (
+                    <span className="text-xs text-muted-foreground ml-2">€{group.totalRevenue.toFixed(2)}</span>
+                  )}
                 </div>
                 <div className="divide-y divide-border">
                   {group.entries.map((entry) => (
@@ -200,7 +210,12 @@ export default function Hours() {
                           </span>
                         )}
                       </div>
-                      <span className="text-xs text-muted-foreground">{formatDuration(getDuration(entry))}</span>
+                      <div className="flex items-center gap-2">
+                        {entry.revenue != null && (
+                          <span className="text-xs text-primary font-medium">€{entry.revenue.toFixed(2)}</span>
+                        )}
+                        <span className="text-xs text-muted-foreground">{formatDuration(getDuration(entry))}</span>
+                      </div>
                     </div>
                   ))}
                 </div>

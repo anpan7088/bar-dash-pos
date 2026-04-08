@@ -53,6 +53,7 @@ export type Database = {
           clock_out: string | null
           created_at: string
           id: string
+          revenue: number | null
           user_id: string
         }
         Insert: {
@@ -60,6 +61,7 @@ export type Database = {
           clock_out?: string | null
           created_at?: string
           id?: string
+          revenue?: number | null
           user_id: string
         }
         Update: {
@@ -67,6 +69,7 @@ export type Database = {
           clock_out?: string | null
           created_at?: string
           id?: string
+          revenue?: number | null
           user_id?: string
         }
         Relationships: []
