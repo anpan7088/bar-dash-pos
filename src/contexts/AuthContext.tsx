@@ -17,6 +17,7 @@ interface AuthContextType {
   allProfiles: StaffProfile[];
   loading: boolean;
   activeTimeEntryId: string | null;
+  startingCash: number | null;
   clockInTime: Date | null;
   pinLogin: (userId: string, pin: string, startingCash?: number) => Promise<boolean>;
   logout: (revenue: number) => Promise<void>;
@@ -32,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
   const [activeTimeEntryId, setActiveTimeEntryId] = useState<string | null>(null);
   const [clockInTime, setClockInTime] = useState<Date | null>(null);
+  const [startingCash, setStartingCash] = useState<number | null>(null);
 
   const fetchProfiles = async () => {
     const { data } = await supabase
@@ -81,15 +83,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const clockIn = async (userId: string, startingCash?: number) => {
+  const clockIn = async (userId: string, startingCashAmount?: number) => {
     const { data } = await supabase
       .from("time_entries")
-      .insert({ user_id: userId, clock_in: new Date().toISOString(), starting_cash: startingCash ?? null } as any)
+      .insert({ user_id: userId, clock_in: new Date().toISOString(), starting_cash: startingCashAmount ?? null } as any)
       .select("id, clock_in")
       .single();
     if (data) {
       setActiveTimeEntryId(data.id);
       setClockInTime(new Date(data.clock_in));
+      setStartingCash(startingCashAmount ?? null);
     }
   };
 
@@ -101,6 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq("id", activeTimeEntryId);
       setActiveTimeEntryId(null);
       setClockInTime(null);
+      setStartingCash(null);
     }
   };
 
@@ -132,7 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, allProfiles, loading, activeTimeEntryId, clockInTime, pinLogin, logout, refreshProfiles }}
+      value={{ user, profile, allProfiles, loading, activeTimeEntryId, clockInTime, startingCash, pinLogin, logout, refreshProfiles }}
     >
       {children}
     </AuthContext.Provider>

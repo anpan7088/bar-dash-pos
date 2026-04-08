@@ -34,7 +34,7 @@ function ShiftTimer({ clockInTime }: { clockInTime: Date }) {
 }
 
 export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
-  const { logout, clockInTime, profile } = useAuth();
+  const { logout, clockInTime, profile, startingCash } = useAuth();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
   const [showEndShift, setShowEndShift] = useState(false);
@@ -101,6 +101,7 @@ export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
       {showEndShift && staffName && (
         <EndShiftModal
           staffName={staffName}
+          startingCash={startingCash}
           onConfirm={handleEndShift}
           onClose={() => setShowEndShift(false)}
         />
