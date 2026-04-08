@@ -81,10 +81,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => subscription.unsubscribe();
   }, []);
 
-  const clockIn = async (userId: string) => {
+  const clockIn = async (userId: string, startingCash?: number) => {
     const { data } = await supabase
       .from("time_entries")
-      .insert({ user_id: userId, clock_in: new Date().toISOString() })
+      .insert({ user_id: userId, clock_in: new Date().toISOString(), starting_cash: startingCash ?? null } as any)
       .select("id, clock_in")
       .single();
     if (data) {
@@ -104,7 +104,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const pinLogin = async (userId: string, pin: string): Promise<boolean> => {
+  const pinLogin = async (userId: string, pin: string, startingCash?: number): Promise<boolean> => {
     const { data } = await supabase
       .from("profiles")
       .select("*")
@@ -115,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     if (data) {
       setProfile(data as StaffProfile);
-      await clockIn(userId);
+      await clockIn(userId, startingCash);
       return true;
     }
     return false;
