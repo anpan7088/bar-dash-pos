@@ -2,12 +2,15 @@ import { useState } from "react";
 import { useAuth, StaffProfile } from "@/contexts/AuthContext";
 import { Coffee, User, Delete, LogIn } from "lucide-react";
 import { toast } from "sonner";
+import { StartShiftModal } from "@/components/pos/StartShiftModal";
 
 export default function PinLogin() {
   const { allProfiles, pinLogin } = useAuth();
   const [selectedStaff, setSelectedStaff] = useState<StaffProfile | null>(null);
   const [pin, setPin] = useState("");
   const [loading, setLoading] = useState(false);
+  const [showStartShift, setShowStartShift] = useState(false);
+  const [verifiedPin, setVerifiedPin] = useState("");
 
   const handleDigit = (d: string) => {
     if (pin.length < 4) setPin((p) => p + d);
@@ -18,10 +21,34 @@ export default function PinLogin() {
   const handleSubmit = async () => {
     if (!selectedStaff || pin.length !== 4) return;
     setLoading(true);
-    const ok = await pinLogin(selectedStaff.user_id, pin);
+    // Verify PIN first without starting shift
+    const { data } = await (await import("@/integrations/supabase/client")).supabase
+      .from("profiles")
+      .select("*")
+      .eq("user_id", selectedStaff.user_id)
+      .eq("pin", pin)
+      .eq("approved", true)
+      .single();
+
+    setLoading(false);
+    if (!data) {
+      toast.error("Napačen PIN");
+      setPin("");
+      return;
+    }
+    // PIN is correct, show starting cash modal
+    setVerifiedPin(pin);
+    setShowStartShift(true);
+  };
+
+  const handleStartShift = async (startingCash: number) => {
+    if (!selectedStaff) return;
+    setLoading(true);
+    const ok = await pinLogin(selectedStaff.user_id, verifiedPin, startingCash);
     setLoading(false);
     if (!ok) {
-      toast.error("Napačen PIN");
+      toast.error("Napaka pri prijavi");
+      setShowStartShift(false);
       setPin("");
     }
   };
@@ -29,6 +56,7 @@ export default function PinLogin() {
   const handleBack = () => {
     setSelectedStaff(null);
     setPin("");
+    setShowStartShift(false);
   };
 
   return (
@@ -150,6 +178,13 @@ export default function PinLogin() {
             </button>
           </div>
         </div>
+      )}
+
+      {showStartShift && selectedStaff && (
+        <StartShiftModal
+          staffName={selectedStaff.display_name}
+          onConfirm={handleStartShift}
+        />
       )}
     </div>
   );

@@ -18,7 +18,7 @@ interface AuthContextType {
   loading: boolean;
   activeTimeEntryId: string | null;
   clockInTime: Date | null;
-  pinLogin: (userId: string, pin: string) => Promise<boolean>;
+  pinLogin: (userId: string, pin: string, startingCash?: number) => Promise<boolean>;
   logout: (revenue: number) => Promise<void>;
   refreshProfiles: () => Promise<void>;
 }
