@@ -1,13 +1,14 @@
 import { useState } from "react";
-import { LogOut, DollarSign, Delete } from "lucide-react";
+import { LogOut, DollarSign, Delete, TrendingUp, TrendingDown, Minus } from "lucide-react";
 
 interface EndShiftModalProps {
   staffName: string;
+  startingCash: number | null;
   onConfirm: (revenue: number) => void;
   onClose: () => void;
 }
 
-export function EndShiftModal({ staffName, onConfirm, onClose }: EndShiftModalProps) {
+export function EndShiftModal({ staffName, startingCash, onConfirm, onClose }: EndShiftModalProps) {
   const [value, setValue] = useState("");
 
   const handleDigit = (d: string) => {
@@ -25,6 +26,9 @@ export function EndShiftModal({ staffName, onConfirm, onClose }: EndShiftModalPr
     if (isNaN(num) || num < 0) return;
     onConfirm(num);
   };
+
+  const revenue = parseFloat(value) || 0;
+  const diff = startingCash != null ? revenue - startingCash : null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -54,6 +58,40 @@ export function EndShiftModal({ staffName, onConfirm, onClose }: EndShiftModalPr
               <span className="text-lg text-muted-foreground">€</span>
             </div>
           </div>
+
+          {/* Difference display */}
+          {startingCash != null && (
+            <div className="bg-secondary/50 rounded-xl px-4 py-3 space-y-1.5">
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Menjalnina</span>
+                <span className="font-medium">€{startingCash.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <span>Promet</span>
+                <span className="font-medium">€{revenue.toFixed(2)}</span>
+              </div>
+              <div className="border-t border-border pt-1.5 flex items-center justify-between">
+                <span className="text-xs font-semibold text-foreground">Razlika</span>
+                <div className="flex items-center gap-1">
+                  {diff != null && diff > 0 && <TrendingUp className="w-3.5 h-3.5 text-green-500" />}
+                  {diff != null && diff < 0 && <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
+                  {diff != null && diff === 0 && <Minus className="w-3.5 h-3.5 text-muted-foreground" />}
+                  <span
+                    className={`text-sm font-bold ${
+                      diff != null && diff > 0
+                        ? "text-green-500"
+                        : diff != null && diff < 0
+                        ? "text-destructive"
+                        : "text-muted-foreground"
+                    }`}
+                  >
+                    {diff != null && diff > 0 ? "+" : ""}
+                    €{diff != null ? diff.toFixed(2) : "0.00"}
+                  </span>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Numpad */}
           <div className="grid grid-cols-3 gap-2">
