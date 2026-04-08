@@ -10,6 +10,7 @@ interface TimeEntry {
   clock_in: string;
   clock_out: string | null;
   revenue: number | null;
+  starting_cash: number | null;
 }
 
 type ViewMode = "daily" | "weekly" | "monthly";
@@ -211,6 +212,11 @@ export default function Hours() {
                         )}
                       </div>
                       <div className="flex items-center gap-2">
+                        {entry.starting_cash != null && (
+                          <span className="text-xs text-muted-foreground font-medium">
+                            Menj: €{entry.starting_cash.toFixed(2)}
+                          </span>
+                        )}
                         {entry.revenue != null && (
                           <span className="text-xs text-primary font-medium">€{entry.revenue.toFixed(2)}</span>
                         )}
