@@ -11,6 +11,8 @@ interface TimeEntry {
   clock_out: string | null;
   revenue: number | null;
   starting_cash: number | null;
+  cash_revenue: number | null;
+  cash_handed: number | null;
 }
 
 type ViewMode = "daily" | "weekly" | "monthly";
@@ -211,14 +213,28 @@ export default function Hours() {
                           </span>
                         )}
                       </div>
-                      <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-2 flex-wrap justify-end">
                         {entry.starting_cash != null && (
                           <span className="text-xs text-muted-foreground font-medium">
                             Menj: €{entry.starting_cash.toFixed(2)}
                           </span>
                         )}
-                        {entry.revenue != null && (
-                          <span className="text-xs text-primary font-medium">€{entry.revenue.toFixed(2)}</span>
+                        {entry.cash_revenue != null && (
+                          <span className="text-xs text-primary font-medium">
+                            Prom: €{entry.cash_revenue.toFixed(2)}
+                          </span>
+                        )}
+                        {entry.cash_handed != null && (
+                          <span className="text-xs text-muted-foreground font-medium">
+                            Got: €{entry.cash_handed.toFixed(2)}
+                          </span>
+                        )}
+                        {entry.cash_revenue != null && entry.cash_handed != null && (
+                          <span className={`text-xs font-bold ${
+                            entry.cash_revenue - entry.cash_handed > 0 ? "text-green-500" : entry.cash_revenue - entry.cash_handed < 0 ? "text-destructive" : "text-muted-foreground"
+                          }`}>
+                            Razl: {entry.cash_revenue - entry.cash_handed > 0 ? "+" : ""}€{(entry.cash_revenue - entry.cash_handed).toFixed(2)}
+                          </span>
                         )}
                         <span className="text-xs text-muted-foreground">{formatDuration(getDuration(entry))}</span>
                       </div>
