@@ -49,6 +49,8 @@ export type Database = {
       }
       time_entries: {
         Row: {
+          cash_handed: number | null
+          cash_revenue: number | null
           clock_in: string
           clock_out: string | null
           created_at: string
@@ -58,6 +60,8 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          cash_handed?: number | null
+          cash_revenue?: number | null
           clock_in?: string
           clock_out?: string | null
           created_at?: string
@@ -67,6 +71,8 @@ export type Database = {
           user_id: string
         }
         Update: {
+          cash_handed?: number | null
+          cash_revenue?: number | null
           clock_in?: string
           clock_out?: string | null
           created_at?: string
