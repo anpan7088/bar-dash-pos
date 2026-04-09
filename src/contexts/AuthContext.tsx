@@ -36,6 +36,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [activeTimeEntryId, setActiveTimeEntryId] = useState<string | null>(null);
   const [clockInTime, setClockInTime] = useState<Date | null>(null);
   const [startingCash, setStartingCash] = useState<number | null>(null);
+  const [shiftCashRevenue, setShiftCashRevenue] = useState(0);
+
+  const addCashRevenue = (amount: number) => {
+    setShiftCashRevenue((prev) => prev + amount);
+  };
 
   const fetchProfiles = async () => {
     const { data } = await supabase
