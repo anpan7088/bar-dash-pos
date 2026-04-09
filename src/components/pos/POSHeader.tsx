@@ -44,8 +44,8 @@ export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
     return () => clearInterval(timer);
   }, []);
 
-  const handleEndShift = async (revenue: number) => {
-    await logout(revenue);
+  const handleEndShift = async (cashRevenue: number, cashHanded: number) => {
+    await logout(cashRevenue, cashHanded);
     setShowEndShift(false);
   };
 

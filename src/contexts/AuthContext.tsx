@@ -20,7 +20,7 @@ interface AuthContextType {
   startingCash: number | null;
   clockInTime: Date | null;
   pinLogin: (userId: string, pin: string, startingCash?: number) => Promise<boolean>;
-  logout: (revenue: number) => Promise<void>;
+  logout: (cashRevenue: number, cashHanded: number) => Promise<void>;
   refreshProfiles: () => Promise<void>;
 }
 
@@ -96,18 +96,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const clockOut = async (revenue?: number) => {
+  const clockOut = async (cashRevenue?: number, cashHanded?: number) => {
     if (activeTimeEntryId) {
       await supabase
         .from("time_entries")
-        .update({ clock_out: new Date().toISOString(), revenue: revenue ?? null } as any)
+        .update({
+          clock_out: new Date().toISOString(),
+          cash_revenue: cashRevenue ?? null,
+          cash_handed: cashHanded ?? null,
+        } as any)
         .eq("id", activeTimeEntryId);
       setActiveTimeEntryId(null);
       setClockInTime(null);
       setStartingCash(null);
     }
   };
-
   const pinLogin = async (userId: string, pin: string, startingCash?: number): Promise<boolean> => {
     const { data } = await supabase
       .from("profiles")
@@ -125,8 +128,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return false;
   };
 
-  const logout = async (revenue: number) => {
-    await clockOut(revenue);
+  const logout = async (cashRevenue: number, cashHanded: number) => {
+    await clockOut(cashRevenue, cashHanded);
     setProfile(null);
   };
 
