@@ -34,7 +34,7 @@ function ShiftTimer({ clockInTime }: { clockInTime: Date }) {
 }
 
 export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
-  const { logout, clockInTime, profile, startingCash } = useAuth();
+  const { logout, clockInTime, profile, startingCash, shiftCashRevenue } = useAuth();
   const navigate = useNavigate();
   const [time, setTime] = useState(new Date());
   const [showEndShift, setShowEndShift] = useState(false);
@@ -44,8 +44,8 @@ export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
     return () => clearInterval(timer);
   }, []);
 
-  const handleEndShift = async (cashRevenue: number, cashHanded: number) => {
-    await logout(cashRevenue, cashHanded);
+  const handleEndShift = async (cashHanded: number) => {
+    await logout(cashHanded);
     setShowEndShift(false);
   };
 
@@ -102,6 +102,7 @@ export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
         <EndShiftModal
           staffName={staffName}
           startingCash={startingCash}
+          cashRevenue={shiftCashRevenue}
           onConfirm={handleEndShift}
           onClose={() => setShowEndShift(false)}
         />

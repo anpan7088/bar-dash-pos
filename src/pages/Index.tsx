@@ -12,7 +12,7 @@ import PinLogin from "@/pages/PinLogin";
 import { toast } from "sonner";
 
 const Index = () => {
-  const { profile, loading } = useAuth();
+  const { profile, loading, addCashRevenue } = useAuth();
   const [tables, setTables] = useState<Table[]>(initialTables);
   const [view, setView] = useState<ViewMode>("tables");
   const [activeTable, setActiveTable] = useState<Table | null>(null);
@@ -76,6 +76,9 @@ const Index = () => {
     (method: PaymentMethod) => {
       if (!activeTable) return;
       const total = orderItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
+      if (method === "cash") {
+        addCashRevenue(total);
+      }
       setTables((prev) =>
         prev.map((t) =>
           t.id === activeTable.id ? { ...t, status: "free" as const, order: [] } : t
@@ -87,7 +90,7 @@ const Index = () => {
       setOrderItems([]);
       toast.success(`Plačilo €${total.toFixed(2)} (${method}) potrjeno za ${activeTable.name}`);
     },
-    [activeTable, orderItems]
+    [activeTable, orderItems, addCashRevenue]
   );
 
   if (loading) {

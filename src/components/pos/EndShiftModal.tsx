@@ -1,45 +1,37 @@
 import { useState } from "react";
-import { LogOut, DollarSign, Delete, TrendingUp, TrendingDown, Minus, Banknote, Receipt } from "lucide-react";
+import { LogOut, Delete, TrendingUp, TrendingDown, Minus, Banknote, Receipt } from "lucide-react";
 
 interface EndShiftModalProps {
   staffName: string;
   startingCash: number | null;
-  onConfirm: (cashRevenue: number, cashHanded: number) => void;
+  cashRevenue: number;
+  onConfirm: (cashHanded: number) => void;
   onClose: () => void;
 }
 
-type InputField = "cashRevenue" | "cashHanded";
-
-export function EndShiftModal({ staffName, startingCash, onConfirm, onClose }: EndShiftModalProps) {
-  const [cashRevenueValue, setCashRevenueValue] = useState("");
+export function EndShiftModal({ staffName, startingCash, cashRevenue, onConfirm, onClose }: EndShiftModalProps) {
   const [cashHandedValue, setCashHandedValue] = useState("");
-  const [activeField, setActiveField] = useState<InputField>("cashRevenue");
-
-  const activeValue = activeField === "cashRevenue" ? cashRevenueValue : cashHandedValue;
-  const setActiveValue = activeField === "cashRevenue" ? setCashRevenueValue : setCashHandedValue;
 
   const handleDigit = (d: string) => {
-    if (activeValue.length < 8) setActiveValue((v) => v + d);
+    if (cashHandedValue.length < 8) setCashHandedValue((v) => v + d);
   };
 
   const handleDot = () => {
-    if (!activeValue.includes(".")) setActiveValue((v) => v + ".");
+    if (!cashHandedValue.includes(".")) setCashHandedValue((v) => v + ".");
   };
 
-  const handleDelete = () => setActiveValue((v) => v.slice(0, -1));
+  const handleDelete = () => setCashHandedValue((v) => v.slice(0, -1));
 
   const handleSubmit = () => {
-    const cr = parseFloat(cashRevenueValue);
     const ch = parseFloat(cashHandedValue);
-    if (isNaN(cr) || cr < 0 || isNaN(ch) || ch < 0) return;
-    onConfirm(cr, ch);
+    if (isNaN(ch) || ch < 0) return;
+    onConfirm(ch);
   };
 
-  const cashRevenue = parseFloat(cashRevenueValue) || 0;
   const cashHanded = parseFloat(cashHandedValue) || 0;
-  const diff = cashRevenue - cashHanded;
+  const diff = cashHanded - cashRevenue;
 
-  const canSubmit = cashRevenueValue && cashHandedValue && parseFloat(cashRevenueValue) >= 0 && parseFloat(cashHandedValue) >= 0;
+  const canSubmit = cashHandedValue && parseFloat(cashHandedValue) >= 0;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
@@ -58,48 +50,19 @@ export function EndShiftModal({ staffName, startingCash, onConfirm, onClose }: E
         </div>
 
         <div className="p-5 space-y-4">
-          {/* Two input fields */}
-          <div className="space-y-2">
-            {/* Cash Revenue */}
-            <button
-              onClick={() => setActiveField("cashRevenue")}
-              className={`w-full flex items-center gap-2 rounded-xl px-4 py-3 transition-all ${
-                activeField === "cashRevenue"
-                  ? "bg-primary/10 border-2 border-primary"
-                  : "bg-secondary border-2 border-transparent"
-              }`}
-            >
-              <Receipt className={`w-5 h-5 ${activeField === "cashRevenue" ? "text-primary" : "text-muted-foreground"}`} />
-              <div className="flex-1 text-left">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Gotovinski promet</p>
-                <span className="text-xl font-bold tabular-nums">
-                  {cashRevenueValue || "0"}
-                </span>
-              </div>
-              <span className="text-lg text-muted-foreground">€</span>
-            </button>
-
-            {/* Cash Handed */}
-            <button
-              onClick={() => setActiveField("cashHanded")}
-              className={`w-full flex items-center gap-2 rounded-xl px-4 py-3 transition-all ${
-                activeField === "cashHanded"
-                  ? "bg-primary/10 border-2 border-primary"
-                  : "bg-secondary border-2 border-transparent"
-              }`}
-            >
-              <Banknote className={`w-5 h-5 ${activeField === "cashHanded" ? "text-primary" : "text-muted-foreground"}`} />
-              <div className="flex-1 text-left">
-                <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Oddana gotovina</p>
-                <span className="text-xl font-bold tabular-nums">
-                  {cashHandedValue || "0"}
-                </span>
-              </div>
-              <span className="text-lg text-muted-foreground">€</span>
-            </button>
+          {/* Cash handed input */}
+          <div className="w-full flex items-center gap-2 rounded-xl px-4 py-3 bg-primary/10 border-2 border-primary">
+            <Banknote className="w-5 h-5 text-primary" />
+            <div className="flex-1 text-left">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider">Gotovina v blagajni</p>
+              <span className="text-xl font-bold tabular-nums">
+                {cashHandedValue || "0"}
+              </span>
+            </div>
+            <span className="text-lg text-muted-foreground">€</span>
           </div>
 
-          {/* Difference display */}
+          {/* Summary */}
           <div className="bg-secondary/50 rounded-xl px-4 py-3 space-y-1.5">
             {startingCash != null && (
               <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -108,7 +71,10 @@ export function EndShiftModal({ staffName, startingCash, onConfirm, onClose }: E
               </div>
             )}
             <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Gotovinski promet</span>
+              <div className="flex items-center gap-1">
+                <Receipt className="w-3 h-3" />
+                <span>Gotovinski promet (računi)</span>
+              </div>
               <span className="font-medium">€{cashRevenue.toFixed(2)}</span>
             </div>
             <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -118,12 +84,12 @@ export function EndShiftModal({ staffName, startingCash, onConfirm, onClose }: E
             <div className="border-t border-border pt-1.5 flex items-center justify-between">
               <span className="text-xs font-semibold text-foreground">Razlika</span>
               <div className="flex items-center gap-1">
-                {diff > 0 && <TrendingUp className="w-3.5 h-3.5 text-green-500" />}
-                {diff < 0 && <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
-                {diff === 0 && <Minus className="w-3.5 h-3.5 text-muted-foreground" />}
+                {diff > 0.005 && <TrendingUp className="w-3.5 h-3.5 text-green-500" />}
+                {diff < -0.005 && <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
+                {Math.abs(diff) < 0.005 && <Minus className="w-3.5 h-3.5 text-muted-foreground" />}
                 <span
                   className={`text-sm font-bold ${
-                    diff > 0 ? "text-green-500" : diff < 0 ? "text-destructive" : "text-muted-foreground"
+                    diff > 0.005 ? "text-green-500" : diff < -0.005 ? "text-destructive" : "text-muted-foreground"
                   }`}
                 >
                   {diff > 0 ? "+" : ""}€{diff.toFixed(2)}
