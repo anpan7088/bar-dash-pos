@@ -20,7 +20,9 @@ interface AuthContextType {
   startingCash: number | null;
   clockInTime: Date | null;
   shiftCashRevenue: number;
+  shiftCardRevenue: number;
   addCashRevenue: (amount: number) => void;
+  addCardRevenue: (amount: number) => void;
   pinLogin: (userId: string, pin: string, startingCash?: number) => Promise<boolean>;
   logout: (cashHanded: number) => Promise<void>;
   refreshProfiles: () => Promise<void>;
@@ -37,9 +39,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [clockInTime, setClockInTime] = useState<Date | null>(null);
   const [startingCash, setStartingCash] = useState<number | null>(null);
   const [shiftCashRevenue, setShiftCashRevenue] = useState(0);
+  const [shiftCardRevenue, setShiftCardRevenue] = useState(0);
 
   const addCashRevenue = (amount: number) => {
     setShiftCashRevenue((prev) => prev + amount);
+  };
+
+  const addCardRevenue = (amount: number) => {
+    setShiftCardRevenue((prev) => prev + amount);
   };
 
   const fetchProfiles = async () => {
@@ -101,6 +108,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setClockInTime(new Date(data.clock_in));
       setStartingCash(startingCashAmount ?? null);
       setShiftCashRevenue(0);
+      setShiftCardRevenue(0);
     }
   };
 
@@ -118,6 +126,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setClockInTime(null);
       setStartingCash(null);
       setShiftCashRevenue(0);
+      setShiftCardRevenue(0);
     }
   };
   const pinLogin = async (userId: string, pin: string, startingCash?: number): Promise<boolean> => {
@@ -148,7 +157,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider
-      value={{ user, profile, allProfiles, loading, activeTimeEntryId, clockInTime, startingCash, shiftCashRevenue, addCashRevenue, pinLogin, logout, refreshProfiles }}
+      value={{ user, profile, allProfiles, loading, activeTimeEntryId, clockInTime, startingCash, shiftCashRevenue, shiftCardRevenue, addCashRevenue, addCardRevenue, pinLogin, logout, refreshProfiles }}
     >
       {children}
     </AuthContext.Provider>
