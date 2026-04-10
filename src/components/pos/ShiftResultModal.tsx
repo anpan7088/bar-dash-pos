@@ -37,12 +37,22 @@ export function ShiftResultModal({ staffName, startingCash, cashRevenue, cardRev
               <span>Oddana gotovina</span>
               <span className="font-medium">€{cashHanded.toFixed(2)}</span>
             </div>
+            {cardRevenue > 0 && (
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span className="flex items-center gap-1.5"><CreditCard className="w-3.5 h-3.5" />Kartični promet</span>
+                <span className="font-medium">€{cardRevenue.toFixed(2)}</span>
+              </div>
+            )}
             {startingCash != null && (
               <div className="flex items-center justify-between text-xs text-muted-foreground/70">
                 <span>Menjalnina</span>
                 <span className="font-medium">€{startingCash.toFixed(2)}</span>
               </div>
             )}
+            <div className="border-t border-border pt-2 flex items-center justify-between text-sm font-semibold text-foreground">
+              <span>Skupni promet</span>
+              <span>€{(cashRevenue + cardRevenue).toFixed(2)}</span>
+            </div>
           </div>
 
           <div className="rounded-xl border-2 px-5 py-4 flex flex-col items-center gap-1"
