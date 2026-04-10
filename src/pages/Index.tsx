@@ -7,18 +7,27 @@ import { CategoryBar } from "@/components/pos/CategoryBar";
 import { ProductGrid } from "@/components/pos/ProductGrid";
 import { OrderPanel } from "@/components/pos/OrderPanel";
 import { PaymentModal } from "@/components/pos/PaymentModal";
+import { ShiftResultModal } from "@/components/pos/ShiftResultModal";
 import { useAuth } from "@/contexts/AuthContext";
 import PinLogin from "@/pages/PinLogin";
 import { toast } from "sonner";
 
+interface ShiftResult {
+  staffName: string;
+  startingCash: number | null;
+  cashRevenue: number;
+  cashHanded: number;
+}
+
 const Index = () => {
-  const { profile, loading, addCashRevenue } = useAuth();
+  const { profile, loading, addCashRevenue, logout, startingCash, shiftCashRevenue } = useAuth();
   const [tables, setTables] = useState<Table[]>(initialTables);
   const [view, setView] = useState<ViewMode>("tables");
   const [activeTable, setActiveTable] = useState<Table | null>(null);
   const [orderItems, setOrderItems] = useState<OrderItem[]>([]);
   const [category, setCategory] = useState("coffee");
   const [showPayment, setShowPayment] = useState(false);
+  const [shiftResult, setShiftResult] = useState<ShiftResult | null>(null);
 
   const selectTable = useCallback((table: Table) => {
     setActiveTable(table);
@@ -93,11 +102,36 @@ const Index = () => {
     [activeTable, orderItems, addCashRevenue]
   );
 
+  const handleEndShift = useCallback(async (cashHanded: number) => {
+    if (!profile) return;
+    const result: ShiftResult = {
+      staffName: profile.display_name,
+      startingCash,
+      cashRevenue: shiftCashRevenue,
+      cashHanded,
+    };
+    await logout(cashHanded);
+    setShiftResult(result);
+  }, [profile, startingCash, shiftCashRevenue, logout]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-screen bg-background">
         <div className="animate-pulse text-muted-foreground">Nalaganje...</div>
       </div>
+    );
+  }
+
+  // Show shift result modal even when logged out
+  if (shiftResult) {
+    return (
+      <ShiftResultModal
+        staffName={shiftResult.staffName}
+        startingCash={shiftResult.startingCash}
+        cashRevenue={shiftResult.cashRevenue}
+        cashHanded={shiftResult.cashHanded}
+        onClose={() => setShiftResult(null)}
+      />
     );
   }
 
@@ -109,7 +143,7 @@ const Index = () => {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden">
-      <POSHeader staffName={profile.display_name} staffRole={profile.role} />
+      <POSHeader staffName={profile.display_name} staffRole={profile.role} onEndShift={handleEndShift} />
 
       {view === "tables" ? (
         <div className="flex-1 overflow-y-auto">
