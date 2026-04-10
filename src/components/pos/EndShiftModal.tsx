@@ -26,12 +26,8 @@ export function EndShiftModal({ staffName, startingCash, cashRevenue, onConfirm,
   const handleSubmit = () => {
     const ch = parseFloat(cashHandedValue);
     if (isNaN(ch) || ch < 0) return;
-    setStep("result");
-  };
-
-  const handleFinalConfirm = () => {
-    const ch = parseFloat(cashHandedValue) || 0;
     onConfirm(ch);
+    setStep("result");
   };
 
   const cashHanded = parseFloat(cashHandedValue) || 0;
@@ -96,20 +92,12 @@ export function EndShiftModal({ staffName, startingCash, cashRevenue, onConfirm,
               </span>
             </div>
 
-            <div className="flex gap-2">
-              <button
-                onClick={() => setStep("input")}
-                className="flex-1 py-3 rounded-xl bg-secondary text-sm font-semibold hover:bg-secondary/80 transition-colors"
-              >
-                Nazaj
-              </button>
-              <button
-                onClick={handleFinalConfirm}
-                className="flex-1 py-3 rounded-xl bg-destructive text-destructive-foreground text-sm font-bold hover:brightness-110 active:scale-95 transition-all"
-              >
-                Potrdi odjavo
-              </button>
-            </div>
+            <button
+              onClick={onClose}
+              className="w-full py-3 rounded-xl bg-secondary text-sm font-semibold hover:bg-secondary/80 transition-colors"
+            >
+              Zapri
+            </button>
           </div>
         </div>
       </div>
