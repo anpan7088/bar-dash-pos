@@ -1,14 +1,15 @@
-import { TrendingUp, TrendingDown, Minus, Receipt } from "lucide-react";
+import { TrendingUp, TrendingDown, Minus, Receipt, CreditCard } from "lucide-react";
 
 interface ShiftResultModalProps {
   staffName: string;
   startingCash: number | null;
   cashRevenue: number;
+  cardRevenue: number;
   cashHanded: number;
   onClose: () => void;
 }
 
-export function ShiftResultModal({ staffName, startingCash, cashRevenue, cashHanded, onClose }: ShiftResultModalProps) {
+export function ShiftResultModal({ staffName, startingCash, cashRevenue, cardRevenue, cashHanded, onClose }: ShiftResultModalProps) {
   const diff = cashHanded - cashRevenue;
 
   return (
