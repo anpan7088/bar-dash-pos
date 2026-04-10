@@ -16,11 +16,12 @@ interface ShiftResult {
   staffName: string;
   startingCash: number | null;
   cashRevenue: number;
+  cardRevenue: number;
   cashHanded: number;
 }
 
 const Index = () => {
-  const { profile, loading, addCashRevenue, logout, startingCash, shiftCashRevenue } = useAuth();
+  const { profile, loading, addCashRevenue, addCardRevenue, logout, startingCash, shiftCashRevenue, shiftCardRevenue } = useAuth();
   const [tables, setTables] = useState<Table[]>(initialTables);
   const [view, setView] = useState<ViewMode>("tables");
   const [activeTable, setActiveTable] = useState<Table | null>(null);
@@ -87,6 +88,8 @@ const Index = () => {
       const total = orderItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
       if (method === "cash") {
         addCashRevenue(total);
+      } else if (method === "card") {
+        addCardRevenue(total);
       }
       setTables((prev) =>
         prev.map((t) =>
@@ -99,7 +102,7 @@ const Index = () => {
       setOrderItems([]);
       toast.success(`Plačilo €${total.toFixed(2)} (${method}) potrjeno za ${activeTable.name}`);
     },
-    [activeTable, orderItems, addCashRevenue]
+    [activeTable, orderItems, addCashRevenue, addCardRevenue]
   );
 
   const handleEndShift = useCallback(async (cashHanded: number) => {
@@ -108,11 +111,12 @@ const Index = () => {
       staffName: profile.display_name,
       startingCash,
       cashRevenue: shiftCashRevenue,
+      cardRevenue: shiftCardRevenue,
       cashHanded,
     };
     await logout(cashHanded);
     setShiftResult(result);
-  }, [profile, startingCash, shiftCashRevenue, logout]);
+  }, [profile, startingCash, shiftCashRevenue, shiftCardRevenue, logout]);
 
   if (loading) {
     return (
@@ -129,6 +133,7 @@ const Index = () => {
         staffName={shiftResult.staffName}
         startingCash={shiftResult.startingCash}
         cashRevenue={shiftResult.cashRevenue}
+        cardRevenue={shiftResult.cardRevenue}
         cashHanded={shiftResult.cashHanded}
         onClose={() => setShiftResult(null)}
       />
