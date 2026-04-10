@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { LogOut, Delete, TrendingUp, TrendingDown, Minus, Banknote, Receipt } from "lucide-react";
+import { LogOut, Delete, Banknote, CheckCircle, TrendingUp, TrendingDown, Minus, Receipt } from "lucide-react";
 
 interface EndShiftModalProps {
   staffName: string;
@@ -10,6 +10,7 @@ interface EndShiftModalProps {
 }
 
 export function EndShiftModal({ staffName, startingCash, cashRevenue, onConfirm, onClose }: EndShiftModalProps) {
+  const [step, setStep] = useState<"input" | "result">("input");
   const [cashHandedValue, setCashHandedValue] = useState("");
 
   const handleDigit = (d: string) => {
@@ -25,18 +26,99 @@ export function EndShiftModal({ staffName, startingCash, cashRevenue, onConfirm,
   const handleSubmit = () => {
     const ch = parseFloat(cashHandedValue);
     if (isNaN(ch) || ch < 0) return;
+    setStep("result");
+  };
+
+  const handleFinalConfirm = () => {
+    const ch = parseFloat(cashHandedValue) || 0;
     onConfirm(ch);
   };
 
   const cashHanded = parseFloat(cashHandedValue) || 0;
   const diff = cashHanded - cashRevenue;
-
   const canSubmit = cashHandedValue && parseFloat(cashHandedValue) >= 0;
+
+  if (step === "result") {
+    return (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
+        <div className="w-full max-w-sm bg-card border border-border rounded-2xl overflow-hidden">
+          <div className="px-5 py-4 border-b border-border bg-secondary/50">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/20 flex items-center justify-center">
+                <Receipt className="w-5 h-5 text-primary" />
+              </div>
+              <div>
+                <h2 className="text-base font-bold text-foreground">Obračun izmene</h2>
+                <p className="text-xs text-muted-foreground">{staffName}</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-5 space-y-4">
+            <div className="bg-secondary/50 rounded-xl px-4 py-3 space-y-2">
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Gotovinski promet (računi)</span>
+                <span className="font-medium">€{cashRevenue.toFixed(2)}</span>
+              </div>
+              <div className="flex items-center justify-between text-sm text-muted-foreground">
+                <span>Oddana gotovina</span>
+                <span className="font-medium">€{cashHanded.toFixed(2)}</span>
+              </div>
+              {startingCash != null && (
+                <div className="flex items-center justify-between text-xs text-muted-foreground/70">
+                  <span>Menjalnina</span>
+                  <span className="font-medium">€{startingCash.toFixed(2)}</span>
+                </div>
+              )}
+            </div>
+
+            <div className="rounded-xl border-2 px-5 py-4 flex flex-col items-center gap-1"
+              style={{
+                borderColor: Math.abs(diff) < 0.005 ? 'hsl(var(--primary))' : diff > 0 ? '#22c55e' : 'hsl(var(--destructive))',
+                background: Math.abs(diff) < 0.005 ? 'hsl(var(--primary) / 0.1)' : diff > 0 ? 'rgba(34,197,94,0.1)' : 'hsl(var(--destructive) / 0.1)',
+              }}
+            >
+              <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                {diff > 0.005 && <TrendingUp className="w-4 h-4 text-green-500" />}
+                {diff < -0.005 && <TrendingDown className="w-4 h-4 text-destructive" />}
+                {Math.abs(diff) < 0.005 && <Minus className="w-4 h-4 text-primary" />}
+                <span>Razlika</span>
+              </div>
+              <span
+                className={`text-2xl font-bold ${
+                  Math.abs(diff) < 0.005 ? "text-primary" : diff > 0 ? "text-green-500" : "text-destructive"
+                }`}
+              >
+                {diff > 0 ? "+" : ""}€{diff.toFixed(2)}
+              </span>
+              <span className="text-[10px] text-muted-foreground">
+                {Math.abs(diff) < 0.005 ? "Promet se ujema ✓" : diff > 0 ? "Višek gotovine" : "Manko gotovine"}
+              </span>
+            </div>
+
+            <div className="flex gap-2">
+              <button
+                onClick={() => setStep("input")}
+                className="flex-1 py-3 rounded-xl bg-secondary text-sm font-semibold hover:bg-secondary/80 transition-colors"
+              >
+                Nazaj
+              </button>
+              <button
+                onClick={handleFinalConfirm}
+                className="flex-1 py-3 rounded-xl bg-destructive text-destructive-foreground text-sm font-bold hover:brightness-110 active:scale-95 transition-all"
+              >
+                Potrdi odjavo
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4">
       <div className="w-full max-w-sm bg-card border border-border rounded-2xl overflow-hidden">
-        {/* Header */}
         <div className="px-5 py-4 border-b border-border bg-destructive/10">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-destructive/20 flex items-center justify-center">
@@ -50,7 +132,6 @@ export function EndShiftModal({ staffName, startingCash, cashRevenue, onConfirm,
         </div>
 
         <div className="p-5 space-y-4">
-          {/* Cash handed input */}
           <div className="w-full flex items-center gap-2 rounded-xl px-4 py-3 bg-primary/10 border-2 border-primary">
             <Banknote className="w-5 h-5 text-primary" />
             <div className="flex-1 text-left">
@@ -62,43 +143,6 @@ export function EndShiftModal({ staffName, startingCash, cashRevenue, onConfirm,
             <span className="text-lg text-muted-foreground">€</span>
           </div>
 
-          {/* Summary */}
-          <div className="bg-secondary/50 rounded-xl px-4 py-3 space-y-1.5">
-            {startingCash != null && (
-              <div className="flex items-center justify-between text-xs text-muted-foreground">
-                <span>Menjalnina</span>
-                <span className="font-medium">€{startingCash.toFixed(2)}</span>
-              </div>
-            )}
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <div className="flex items-center gap-1">
-                <Receipt className="w-3 h-3" />
-                <span>Gotovinski promet (računi)</span>
-              </div>
-              <span className="font-medium">€{cashRevenue.toFixed(2)}</span>
-            </div>
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>Oddana gotovina</span>
-              <span className="font-medium">€{cashHanded.toFixed(2)}</span>
-            </div>
-            <div className="border-t border-border pt-1.5 flex items-center justify-between">
-              <span className="text-xs font-semibold text-foreground">Razlika</span>
-              <div className="flex items-center gap-1">
-                {diff > 0.005 && <TrendingUp className="w-3.5 h-3.5 text-green-500" />}
-                {diff < -0.005 && <TrendingDown className="w-3.5 h-3.5 text-destructive" />}
-                {Math.abs(diff) < 0.005 && <Minus className="w-3.5 h-3.5 text-muted-foreground" />}
-                <span
-                  className={`text-sm font-bold ${
-                    diff > 0.005 ? "text-green-500" : diff < -0.005 ? "text-destructive" : "text-muted-foreground"
-                  }`}
-                >
-                  {diff > 0 ? "+" : ""}€{diff.toFixed(2)}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          {/* Numpad */}
           <div className="grid grid-cols-3 gap-2">
             {["1", "2", "3", "4", "5", "6", "7", "8", "9"].map((d) => (
               <button
@@ -129,7 +173,6 @@ export function EndShiftModal({ staffName, startingCash, cashRevenue, onConfirm,
             </button>
           </div>
 
-          {/* Actions */}
           <div className="flex gap-2">
             <button
               onClick={onClose}
@@ -142,7 +185,7 @@ export function EndShiftModal({ staffName, startingCash, cashRevenue, onConfirm,
               disabled={!canSubmit}
               className="flex-1 py-3 rounded-xl bg-destructive text-destructive-foreground text-sm font-bold hover:brightness-110 active:scale-95 transition-all disabled:opacity-40"
             >
-              Odjavi se
+              Naprej
             </button>
           </div>
         </div>
