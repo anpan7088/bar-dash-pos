@@ -46,7 +46,6 @@ export function POSHeader({ staffName, staffRole }: POSHeaderProps) {
 
   const handleEndShift = async (cashHanded: number) => {
     await logout(cashHanded);
-    setShowEndShift(false);
   };
 
   return (
