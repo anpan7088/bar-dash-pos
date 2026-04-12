@@ -32,7 +32,8 @@ export default function Register() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Registracija uspešna! Počakaj na odobritev administratorja.");
+      toast.success("Registracija uspešna!");
+      await refreshProfiles();
       navigate("/");
     }
   };
