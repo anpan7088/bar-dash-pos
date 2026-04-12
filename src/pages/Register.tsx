@@ -3,9 +3,11 @@ import { supabase } from "@/integrations/supabase/client";
 import { Coffee, ArrowLeft } from "lucide-react";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Register() {
   const navigate = useNavigate();
+  const { refreshProfiles } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -30,7 +32,8 @@ export default function Register() {
     if (error) {
       toast.error(error.message);
     } else {
-      toast.success("Registracija uspešna! Počakaj na odobritev administratorja.");
+      toast.success("Registracija uspešna!");
+      await refreshProfiles();
       navigate("/");
     }
   };
