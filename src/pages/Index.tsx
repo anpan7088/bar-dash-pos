@@ -83,10 +83,13 @@ const Index = () => {
   }, [activeTable, orderItems]);
 
   const handlePayment = useCallback(
-    (method: PaymentMethod) => {
+    (method: PaymentMethod, splitCash?: number, splitCard?: number) => {
       if (!activeTable) return;
       const total = orderItems.reduce((s, i) => s + i.product.price * i.quantity, 0);
-      if (method === "cash") {
+      if (method === "split" && splitCash != null && splitCard != null) {
+        addCashRevenue(splitCash);
+        addCardRevenue(splitCard);
+      } else if (method === "cash") {
         addCashRevenue(total);
       } else if (method === "card") {
         addCardRevenue(total);
