@@ -1,4 +1,4 @@
-import { Clock, Coffee, LogOut, Timer } from "lucide-react";
+import { Clock, Coffee, LogOut, Timer, Settings } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
@@ -73,6 +73,13 @@ export function POSHeader({ staffName, staffRole, onEndShift }: POSHeaderProps) 
                 title="Pregled ur"
               >
                 Ure
+              </button>
+              <button
+                onClick={() => navigate("/settings")}
+                className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                title="Nastavitve"
+              >
+                <Settings className="w-4 h-4 text-muted-foreground" />
               </button>
               <div className="text-right">
                 <p className="text-sm font-medium leading-tight">{staffName}</p>
