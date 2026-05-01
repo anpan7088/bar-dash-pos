@@ -43,8 +43,8 @@
     --warning-foreground: 220 20% 8%;
 
     --table-free: 142 60% 45%;
-    --table-occupied: 36 90% 55%;
-    --table-reserved: 0 72% 51%;
+    --table-occupied: 0 72% 51%;
+    --table-reserved: 36 90% 55%;
 
     --sidebar-background: 220 20% 8%;
     --sidebar-foreground: 40 10% 85%;

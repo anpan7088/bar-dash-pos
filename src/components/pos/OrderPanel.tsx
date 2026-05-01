@@ -81,16 +81,25 @@ export function OrderPanel({ tableName, items, onUpdateQty, onRemove, onPay, onB
       {/* Footer */}
       <div className="p-4 border-t border-border space-y-3">
         <div className="flex justify-between text-lg font-bold">
-          <span>Total</span>
+          <span>Skupaj</span>
           <span className="text-primary">€{total.toFixed(2)}</span>
         </div>
-        <button
-          onClick={onPay}
-          disabled={items.length === 0}
-          className="w-full py-4 rounded-xl bg-primary text-primary-foreground font-bold text-base transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
-        >
-          Pay €{total.toFixed(2)}
-        </button>
+        <div className="grid grid-cols-2 gap-2">
+          <button
+            onClick={onBack}
+            disabled={items.length === 0}
+            className="py-4 rounded-xl bg-secondary text-secondary-foreground font-bold text-base transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
+          >
+            Shrani
+          </button>
+          <button
+            onClick={onPay}
+            disabled={items.length === 0}
+            className="py-4 rounded-xl bg-primary text-primary-foreground font-bold text-base transition-all active:scale-[0.98] disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110"
+          >
+            Plačaj €{total.toFixed(2)}
+          </button>
+        </div>
       </div>
     </div>
   );
