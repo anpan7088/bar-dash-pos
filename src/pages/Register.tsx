@@ -7,7 +7,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Register() {
   const navigate = useNavigate();
-  const { refreshProfiles } = useAuth();
+  const { refreshProfiles, pinLogin } = useAuth();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -21,19 +21,40 @@ export default function Register() {
       return;
     }
     setLoading(true);
-    const { error } = await supabase.auth.signUp({
+    const { data, error } = await supabase.auth.signUp({
       email,
       password,
       options: {
+        emailRedirectTo: `${window.location.origin}/`,
         data: { display_name: name, pin },
       },
     });
-    setLoading(false);
     if (error) {
+      setLoading(false);
       toast.error(error.message);
+      return;
+    }
+
+    // If email confirmation is required, no session is returned
+    if (!data.session) {
+      setLoading(false);
+      toast.success("Registracija uspešna! Preveri e-pošto za potrditev.");
+      await refreshProfiles();
+      navigate("/");
+      return;
+    }
+
+    // Auto-confirmed: sign out the auth session (POS uses PIN login) and start shift via PIN
+    await refreshProfiles();
+    const userId = data.session.user.id;
+    await supabase.auth.signOut();
+    const ok = await pinLogin(userId, pin, 0);
+    setLoading(false);
+    if (ok) {
+      toast.success("Registracija uspešna! Dobrodošel.");
+      navigate("/");
     } else {
       toast.success("Registracija uspešna!");
-      await refreshProfiles();
       navigate("/");
     }
   };
