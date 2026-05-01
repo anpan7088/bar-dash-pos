@@ -34,11 +34,6 @@ const Index = () => {
     setActiveTable(table);
     setOrderItems(table.order || []);
     setView("order");
-    if (table.status === "free") {
-      setTables((prev) =>
-        prev.map((t) => (t.id === table.id ? { ...t, status: "occupied" as const } : t))
-      );
-    }
   }, []);
 
   const addProduct = useCallback((product: Product) => {
