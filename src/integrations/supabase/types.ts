@@ -14,6 +14,45 @@ export type Database = {
   }
   public: {
     Tables: {
+      products: {
+        Row: {
+          active: boolean
+          category: string
+          created_at: string
+          emoji: string
+          id: string
+          low_stock_threshold: number
+          name: string
+          price: number
+          stock: number
+          updated_at: string
+        }
+        Insert: {
+          active?: boolean
+          category: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          low_stock_threshold?: number
+          name: string
+          price?: number
+          stock?: number
+          updated_at?: string
+        }
+        Update: {
+          active?: boolean
+          category?: string
+          created_at?: string
+          emoji?: string
+          id?: string
+          low_stock_threshold?: number
+          name?: string
+          price?: number
+          stock?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           approved: boolean
@@ -46,6 +85,44 @@ export type Database = {
           user_id?: string
         }
         Relationships: []
+      }
+      stock_movements: {
+        Row: {
+          change: number
+          created_at: string
+          id: string
+          note: string | null
+          product_id: string
+          reason: string
+          user_id: string | null
+        }
+        Insert: {
+          change: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          product_id: string
+          reason?: string
+          user_id?: string | null
+        }
+        Update: {
+          change?: number
+          created_at?: string
+          id?: string
+          note?: string | null
+          product_id?: string
+          reason?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_movements_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       time_entries: {
         Row: {
