@@ -109,6 +109,29 @@ export default function Hours() {
   const totalMs = entries.reduce((sum, e) => sum + getDuration(e), 0);
   const totalRevenue = entries.reduce((sum, e) => sum + (e.revenue || 0), 0);
 
+  // Dashboard ranges
+  const now = new Date();
+  const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+  const dayOfWeek = (now.getDay() + 6) % 7; // Mon=0
+  const startOfWeek = startOfToday - dayOfWeek * 86400000;
+  const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();
+  const startOfPrevMonth = new Date(now.getFullYear(), now.getMonth() - 1, 1).getTime();
+  const endOfPrevMonth = startOfMonth;
+
+  const sumInRange = (from: number, to: number) =>
+    entries.reduce((sum, e) => {
+      const start = new Date(e.clock_in).getTime();
+      const end = e.clock_out ? new Date(e.clock_out).getTime() : Date.now();
+      const overlapStart = Math.max(start, from);
+      const overlapEnd = Math.min(end, to);
+      return sum + Math.max(0, overlapEnd - overlapStart);
+    }, 0);
+
+  const todayMs = sumInRange(startOfToday, Date.now() + 1);
+  const weekMs = sumInRange(startOfWeek, Date.now() + 1);
+  const monthMs = sumInRange(startOfMonth, Date.now() + 1);
+  const prevMonthMs = sumInRange(startOfPrevMonth, endOfPrevMonth);
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
