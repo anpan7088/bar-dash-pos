@@ -1,4 +1,4 @@
-import { Clock, Coffee, LogOut, Timer, Settings } from "lucide-react";
+import { Clock, Coffee, LogOut, Timer, Settings, Users } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate } from "react-router-dom";
