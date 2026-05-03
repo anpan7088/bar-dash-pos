@@ -5,10 +5,12 @@ import { POSHeader } from "@/components/pos/POSHeader";
 import { TableGrid } from "@/components/pos/TableGrid";
 import { CategoryBar } from "@/components/pos/CategoryBar";
 import { ProductGrid } from "@/components/pos/ProductGrid";
+import { ProductSearch } from "@/components/pos/ProductSearch";
 import { OrderPanel } from "@/components/pos/OrderPanel";
 import { PaymentModal } from "@/components/pos/PaymentModal";
 import { ShiftResultModal } from "@/components/pos/ShiftResultModal";
 import { useAuth } from "@/contexts/AuthContext";
+import { useProducts } from "@/hooks/useProducts";
 import PinLogin from "@/pages/PinLogin";
 import { toast } from "sonner";
 
@@ -22,6 +24,7 @@ interface ShiftResult {
 
 const Index = () => {
   const { profile, loading, addCashRevenue, addCardRevenue, logout, startingCash, shiftCashRevenue, shiftCardRevenue } = useAuth();
+  const { products, categories, decrementStockForOrder } = useProducts();
   const [tables, setTables] = useState<Table[]>(initialTables);
   const [view, setView] = useState<ViewMode>("tables");
   const [activeTable, setActiveTable] = useState<Table | null>(null);
