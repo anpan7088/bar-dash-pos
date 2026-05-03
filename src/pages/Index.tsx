@@ -92,6 +92,8 @@ const Index = () => {
       } else if (method === "card") {
         addCardRevenue(total);
       }
+      // Decrement stock for sold items
+      decrementStockForOrder(orderItems, profile?.user_id);
       setTables((prev) =>
         prev.map((t) =>
           t.id === activeTable.id ? { ...t, status: "free" as const, order: [] } : t
@@ -103,7 +105,7 @@ const Index = () => {
       setOrderItems([]);
       toast.success(`Plačilo €${total.toFixed(2)} (${method}) potrjeno za ${activeTable.name}`);
     },
-    [activeTable, orderItems, addCashRevenue, addCardRevenue]
+    [activeTable, orderItems, addCashRevenue, addCardRevenue, decrementStockForOrder, profile]
   );
 
   const handleEndShift = useCallback(async (cashHanded: number) => {
@@ -158,9 +160,16 @@ const Index = () => {
       ) : (
         <div className="flex-1 flex overflow-hidden">
           <div className="flex-1 flex flex-col overflow-hidden">
-            <CategoryBar selected={category} onSelect={setCategory} />
+            <div className="px-4 pt-4">
+              <ProductSearch
+                products={products}
+                categories={categories}
+                onSelect={addProduct}
+              />
+            </div>
+            <CategoryBar selected={category} categories={categories} onSelect={setCategory} />
             <div className="flex-1 overflow-y-auto">
-              <ProductGrid category={category} onAddProduct={addProduct} />
+              <ProductGrid category={category} products={products} onAddProduct={addProduct} />
             </div>
           </div>
           <div className="w-80 lg:w-96 flex-shrink-0">
