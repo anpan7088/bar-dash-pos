@@ -1,11 +1,16 @@
-import { categories } from "@/data/products";
+interface Category {
+  id: string;
+  label: string;
+  emoji: string;
+}
 
 interface CategoryBarProps {
   selected: string;
+  categories: Category[];
   onSelect: (id: string) => void;
 }
 
-export function CategoryBar({ selected, onSelect }: CategoryBarProps) {
+export function CategoryBar({ selected, categories, onSelect }: CategoryBarProps) {
   return (
     <div className="flex gap-2 p-4 pb-0 overflow-x-auto scrollbar-hide">
       {categories.map((cat) => (
