@@ -74,6 +74,15 @@ export function POSHeader({ staffName, staffRole, onEndShift }: POSHeaderProps) 
               >
                 Ure
               </button>
+              {(staffRole === "manager" || staffRole === "admin") && (
+                <button
+                  onClick={() => navigate("/staff")}
+                  className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
+                  title="Zaposleni"
+                >
+                  <Users className="w-4 h-4 text-muted-foreground" />
+                </button>
+              )}
               <button
                 onClick={() => navigate("/settings")}
                 className="w-8 h-8 rounded-lg bg-secondary flex items-center justify-center hover:bg-secondary/80 transition-colors"
