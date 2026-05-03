@@ -4,6 +4,9 @@ export interface Product {
   price: number;
   category: string;
   emoji: string;
+  stock?: number;
+  lowStockThreshold?: number;
+  active?: boolean;
 }
 
 export interface OrderItem {
