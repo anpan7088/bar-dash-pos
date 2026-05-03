@@ -163,6 +163,21 @@ export default function Hours() {
       </header>
 
       <div className="p-4 md:p-6 max-w-2xl mx-auto space-y-6">
+        {/* Dashboard */}
+        <div className="grid grid-cols-2 gap-3">
+          {[
+            { label: "Danes", ms: todayMs, accent: "text-primary" },
+            { label: "Ta teden", ms: weekMs, accent: "text-foreground" },
+            { label: "Ta mesec", ms: monthMs, accent: "text-foreground" },
+            { label: "Prejšnji mesec", ms: prevMonthMs, accent: "text-muted-foreground" },
+          ].map((card) => (
+            <div key={card.label} className="bg-card border border-border rounded-xl p-4">
+              <p className="text-[11px] text-muted-foreground uppercase tracking-wider">{card.label}</p>
+              <p className={`text-2xl font-bold mt-1 ${card.accent}`}>{formatDuration(card.ms)}</p>
+            </div>
+          ))}
+        </div>
+
         {/* Summary card */}
         <div className="bg-card border border-border rounded-xl p-4 flex items-center gap-4">
           <div className="w-12 h-12 rounded-xl bg-primary/10 flex items-center justify-center">
